@@ -9,3 +9,17 @@
 *crab_projects
 *#
 *.pdf
+*.txt
+*_cut
+*
+!*.cc
+!*.h
+*BuildFile*
+!*ciCrossSecCalc_edm_cfg.py
+!*compareOptions_cfi.py
+!*Dimuon_cfi.py
+!*dyCrossSecCalc_edm_cfg.py
+!*genTreeTools_cfg.py
+!*crabConfig_Dimuon_Hist.py
+!*crabConfig_Dimuon_MCAnalysis_CIM500_L9000_8TeV.py
+

@@ -5,4 +5,7 @@
 <use name = "root"/>
 <use name = "DataFormats/HepMCCandidate"/>
 <use name = "FWCore/ServiceRegistry"/>
+<use name = "SimDataFormats/GeneratorProducts"/>
 <flags EDM_PLUGIN="1"/>
+<flags CXXFLAGS="-O0 -g3 -fno-inline"/>
+<flags CXX_FLAGS="-O0 -g3 -fno-inline"/>
