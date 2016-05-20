@@ -1,7 +1,7 @@
 
 import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing ('analysis')
-from SHarper.MCTools.mcCmdLineOptions_cfi import registerDefaultMCOptions
+from GenStudy.Dimuon.mcCmdLineOptions_cfi import registerDefaultMCOptions
 registerDefaultMCOptions(options)
 options.register ('zPrimeModel',
                   "zPrimeSSM",
