@@ -63,6 +63,12 @@ def registerDefaultMCOptions(options):
                       VarParsing.VarParsing.multiplicity.singleton,
                       VarParsing.VarParsing.varType.int,
                       "Process Type")
+    options.register ('pdgId',
+                      13,
+                      VarParsing.VarParsing.multiplicity.singleton,
+                      VarParsing.VarParsing.varType.int,
+                      "Particle ID")
+
     options.register ('ISR',
                       "on",
                       VarParsing.VarParsing.multiplicity.singleton,
