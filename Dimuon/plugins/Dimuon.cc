@@ -63,7 +63,7 @@ private:
   bool isBoson(int pid);
   bool isMuon(int pid);
   bool checkBosonStatus(const reco::GenParticleCollection& genParts);
-  reco::GenParticleCollection getMuons( const reco::GenParticleCollection& genParts);
+
 
   virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -111,7 +111,7 @@ private:
 
   bool isCI_, debug_;
   edm::InputTag genPartsTag_;
-  int decayParticlePID_, status_;
+  int decayParticlePID_, status_, leptonId_;
 
 
   // ----------member data ---------------------------
@@ -183,6 +183,7 @@ Dimuon::Dimuon(const edm::ParameterSet& iConfig)
   status_=iConfig.getParameter<int>("status");
   genPartsTag_=iConfig.getParameter<edm::InputTag>("genPartsTag");
   decayParticlePID_ = iConfig.getParameter<int>("decayParticlePID");
+  leptonId_ = iConfig.getParameter<int>("leptonId");
   //now do what ever initialization is needed
 
 }
@@ -205,6 +206,7 @@ Dimuon::~Dimuon()
 void
 Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  //  isCI_ = true;
   using namespace edm;
   edm::Handle<reco::GenParticleCollection> genPartsHandle;
   iEvent.getByLabel(genPartsTag_,genPartsHandle);
@@ -222,91 +224,95 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   const reco::Candidate* daughter1;
   const reco::Candidate* daughter2;
   const reco::Candidate* mother1;
-  const reco::Candidate* mother2;
+  //  const reco::Candidate* mother2;
   const reco::Candidate* muMinus;
   const reco::Candidate* muPlus;
   math::XYZTLorentzVectorD dimuon;
   double dimuonPx, dimuonPz, dimuonPt, pseudorapidity, Phi;
   
-    reco::GenParticleCollection muonVector = getMuons(genParts);
-    if(muonVector.size() != 2){
-    std::cout << "size of muon vector is: " << muonVector.size() << "\n\n";
-    return;
-    }
-    
-    mother1 = getMother(&(muonVector.at(0)), (&(muonVector.at(0)))->pdgId());
-    mother2 = getMother(&(muonVector.at(1)), (&(muonVector.at(1)))->pdgId());
-    std::cout << "\n\nMother1 ID is:"  <<  mother1->pdgId() << "\t\tMother 2 ID is:" << mother2->pdgId() << std::endl;
+      for(auto &part : genParts){
+	if((part.pdgId() == 1 || part.pdgId() == 2 || part.pdgId() == 3 || part.pdgId() == 4 || part.pdgId() == 5 || part.pdgId() == 6) && 
+	   (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
+	  std::cout << "\nFound the quark! " << "\nQuark is: " << part.pdgId() << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
+	    part.numberOfDaughters() << "\tFirst daughter is:"  << part.daughter(0)->pdgId() << "\tSecond daughter is: " << part.daughter(1)->pdgId() << std::endl;
+	  //      if(part.status() < -20 && part.status() > -30){ std::cout << "\nFound the Z boson!";
+	  std::cout << "\nkinematic properties of the particles are: " << std::endl;
+	  std::cout << "\npT1: " << part.daughter(0)->pt() << "\tpT2: " << part.daughter(1)->pt() << std::endl;
+	  std::cout << "\neta1: " << part.daughter(0)->eta() << "\teta2: " << part.daughter(1)->eta() << std::endl;
+	  std::cout << "\nphi1: " << part.daughter(0)->phi() << "\tphi2: " << part.daughter(1)->phi() << std::endl;
+	  
+	  daughter1 = getLastDaughter(part.daughter(0), part.daughter(0)->pdgId());
+	  daughter2 = getLastDaughter(part.daughter(1), part.daughter(1)->pdgId());
+	  std::cout << "\nDaughter particle is: " << daughter1->pdgId() << "tStatus is: " << daughter1->status()
+		    << "\tDaughter2 is: " << daughter2->pdgId() << "\tStatus is: " << daughter2->status() << std::endl;
+	  boson = nullptr;
+	  if(!daughter1 || !daughter2){
+	    std::cout<<"daughter1::0x"<<std::hex<<daughter1<<std::dec<<std::endl;
+	    std::cout<<"daughter2::0x"<<std::hex<<daughter2<<std::dec<<std::endl;
+	  }
+	}
 
-    if((mother1->pdgId() == mother2->pdgId()) && (mother1->status() == mother2->status())){
-      if(mother1->pdgId() == 22 || mother1->pdgId() == 23 || mother1->pdgId() ==32){
-         boson = mother1;
-	 daughter1 = getLastDaughter(&(muonVector.at(0)), (&(muonVector.at(0)))->pdgId());
-	 daughter2 = getLastDaughter(&(muonVector.at(1)), (&(muonVector.at(1)))->pdgId());
-	 }
-      else boson = nullptr;
+	if(part.pdgId() == 23 && (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
+	  std::cout << "\nFound the Z boson! " << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
+	    part.numberOfDaughters() << "\tFirst daughter is:"  << part.daughter(0)->pdgId() << "\tSecond daughter is: " << part.daughter(1)->pdgId() << std::endl;
+	  //      if(part.status() < -20 && part.status() > -30){ std::cout << "\nFound the Z boson!";
+	  std::cout << "\nkinematic properties of the particles are: " << std::endl;
+	  std::cout << "\npT1: " << part.daughter(0)->pt() << "\tpT2: " << part.daughter(1)->pt() << std::endl;
+	  std::cout << "\neta1: " << part.daughter(0)->eta() << "\teta2: " << part.daughter(1)->eta() << std::endl;
+	  std::cout << "\nphi1: " << part.daughter(0)->phi() << "\tphi2: " << part.daughter(1)->phi() << std::endl;
+	  
+	  daughter1 = getLastDaughter(part.daughter(0), part.daughter(0)->pdgId());
+	  daughter2 = getLastDaughter(part.daughter(1), part.daughter(1)->pdgId());
+	  std::cout << "\nDaughter particle is: " << daughter1->pdgId() << "tStatus is: " << daughter1->status()
+		    << "\tDaughter2 is: " << daughter2->pdgId() << "\tStatus is: " << daughter2->status() << std::endl;
+	  mother1 = &part;
+	  boson = mother1;
+	  if(!boson || !daughter1 || !daughter2){
+	    std::cout<<"boson::0x"<<std::hex<<boson<<std::dec<<std::endl;
+	    std::cout<<"daughter1::0x"<<std::hex<<daughter1<<std::dec<<std::endl;
+	    std::cout<<"daughter2::0x"<<std::hex<<daughter2<<std::dec<<std::endl;
+	  }
+
+	}
       }
-    
-    if((abs(mother1->pdgId()) == abs( mother2->pdgId())) && (mother1->status() == mother2->status())){
-    daughter1 = getLastDaughter(&(muonVector.at(0)), (&(muonVector.at(0)))->pdgId());
-    daughter2 = getLastDaughter(&(muonVector.at(1)), (&(muonVector.at(1)))->pdgId());
-    }
 
-    else return;
-    
-    /*
-
-  if(!isCI_){
-    boson = getBoson(genParts);
-    daughter1 = getLastDaughter(boson,decayParticlePID_);
-    daughter2 = getLastDaughter(boson,decayParticlePID_*-1); 
-
-   }
-
-  if(isCI_){
-    reco::GenParticleCollection muonVector = getMuons(genParts);
-    boson = nullptr;
-    if(muonVector.size() != 2){
-      std::cout << "size of muon vector is: " << muonVector.size() << "\n\n";
-      return;
-    }
-   
-    daughter1 = getLastDaughter( &(muonVector.at(0)), (&(muonVector.at(0)))->pdgId());
-    daughter2 = getLastDaughter(&(muonVector.at(1)), (&(muonVector.at(1)))->pdgId());
-
-
-  }
-    */
 
     if(debug_){
-  std::cout << "Eta of daughter1 is: " << daughter1->eta() << "\n";
-  std::cout << "Eta of daughter2 is: " << daughter2->eta() << "\n";
+      std::cout << "Eta of daughter1 is: " << daughter1->eta() << "\n";
+      std::cout << "Eta of daughter2 is: " << daughter2->eta() << "\n";
     }
 
-  if(boson){
-    bosonId_=boson->pdgId();
-    bosonP4_.fill(boson->p4());
-
-    h_Zmass->Fill(boson->mass());
-    h_Zpt->Fill(boson->pt());
-    h_Zeta ->Fill(boson->eta());
-    h_Zphi ->Fill(boson->phi());
-    h_Zcharge->Fill(boson->charge());
-  }
-
+    //    if(!isCI_){
+      if(boson){
+	bosonId_=boson->pdgId();
+	bosonP4_.fill(boson->p4());
+	
+	h_Zmass->Fill(boson->mass());
+	h_Zpt->Fill(boson->pt());
+	h_Zeta ->Fill(boson->eta());
+	h_Zphi ->Fill(boson->phi());
+	h_Zcharge->Fill(boson->charge());
+      }
+      //    }
 
     if(daughter1->charge() > 0 && daughter2->charge() < 0){
       muMinus = daughter2;
       muPlus = daughter1;
     }
-    if(daughter1->charge() < 0 && daughter2->charge() > 0){
+    else if(daughter1->charge() < 0 && daughter2->charge() > 0){
       muMinus = daughter1;
       muPlus = daughter2;
     }
+
     else return;
 
+    if(debug_){  
+      std::cout<< "\n\nDaughter1: pId = " << muMinus->pdgId() << "\tpT = " << muMinus->pt() << "\teta = " 
+	       << muMinus->eta() << "\tphi = " << muMinus->phi() << "\tq = " << muMinus->charge();
+      std::cout<< "\nDaughter2: pId = " << muPlus->pdgId() << "\tpT = " << muPlus->pt() << "\teta = " << muPlus->eta() << "\tphi = " << 
+	muPlus->phi() << "\tq = " << muPlus->charge();
+    }
     
-  if(daughter1 && daughter2 && (((std::fabs(daughter1->eta()) < 2.1)&&(std::fabs(daughter2->eta()) < 2.4)) || ((std::fabs(daughter2->eta()) < 2.1)&&(std::fabs(daughter1->eta()) < 2.4)) )){
   muMinusP4_.fill(muMinus->p4());
     muMinusPID_=muMinus->pdgId();
     if(debug_){  
@@ -352,25 +358,11 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     h2_phi1_vs_phi2->Fill(muMinus->phi(),muPlus->phi());  
     h2_eta1_vs_eta2->Fill(muMinus->eta(),muPlus->eta());
     h2_pt1_vs_pt2->Fill(muMinus->pt(),muPlus->pt());
-  }
-  else{
 
-    std::cout<<"daughter1::0x"<<std::hex<<muMinus<<std::dec<<std::endl;
-    std::cout<<"daughter2::0x"<<std::hex<<muPlus<<std::dec<<std::endl;
-  }
-  if(!isCI_){
-    if(!boson || !daughter1 || !daughter2){
-      std::cout<<"boson::0x"<<std::hex<<boson<<std::dec<<std::endl;
-      std::cout<<"daughter1::0x"<<std::hex<<muMinus<<std::dec<<std::endl;
-      std::cout<<"daughter2::0x"<<std::hex<<muPlus<<std::dec<<std::endl;
-    }
-  }
-  else{
-   if(!daughter1 || !daughter2){
-      std::cout<<"daughter1::0x"<<std::hex<<muMinus<<std::dec<<std::endl;
-      std::cout<<"daughter2::0x"<<std::hex<<muPlus<<std::dec<<std::endl;
-   }
-  }
+
+    //  }
+
+  std::cout << "\n\n===========================================================================================================" << std::endl;
   tree_->Fill();  
 }
 
@@ -384,7 +376,7 @@ bool Dimuon::isBoson(int pid)
 }
 
 bool Dimuon::isMuon(int pid){
-  if(abs(pid)==13){
+  if(abs(pid)==11 || abs(pid) ==13){
     if(debug_) std::cout << "\n\nFound A Muon!\n";
     return true;
   }
@@ -420,24 +412,6 @@ const reco::Candidate* Dimuon::getBoson( const reco::GenParticleCollection& genP
   return nullptr;
 }
 
-reco::GenParticleCollection Dimuon::getMuons( const reco::GenParticleCollection& genParts){
-  reco::GenParticleCollection muonVector; 
-
-  for(auto &part : genParts){
-    if(isMuon(part.pdgId()) ){
-      if(debug_)std::cout << "\nParton ID is: " << part.pdgId() << "\tParton status is: " << part.status() << "\tParton Eta is: " << part.eta() <<std::endl;
-      if(part.status()==status_){
-	if(std::fabs(part.eta()) < 2.4){
-	  if(debug_) std::cout << "\tPart.eta() is: " << part.eta() << "\tabsVal of Parton eta is: " << abs(part.eta()) << "\n";
-	  muonVector.push_back(part);
-	}
-      }
-    }
-  }
-  if(debug_ && muonVector.size() == 2) std::cout<<"\n\nFound the muons!\n";
-  return muonVector;
-}
-
 
 const reco::Candidate* Dimuon::getLastDaughter(const reco::Candidate* part,int pid)
 {
@@ -460,14 +434,14 @@ const reco::Candidate* Dimuon::getDaughter(const reco::Candidate* part,int pid)
   for(size_t partNr = 0; part && partNr < part->numberOfMothers(); partNr++){
     if(part->mother(partNr)->pdgId() == pid) return getMother(part->mother(partNr),pid);
   
-  if(abs(part->mother(partNr)->pdgId()) == 1 || abs(part->mother(partNr)->pdgId()) == 2 ||
-		 abs(part->mother(partNr)->pdgId()) == 3 || abs(part->mother(partNr)->pdgId()) == 4 ||
+    else if(abs(part->mother(partNr)->pdgId()) == 1 || abs(part->mother(partNr)->pdgId()) == 2 ||
+	    abs(part->mother(partNr)->pdgId()) == 3 || abs(part->mother(partNr)->pdgId()) == 4 ||
 		 abs(part->mother(partNr)->pdgId()) == 5 || abs(part->mother(partNr)->pdgId()) == 6 ||
-		 abs(part->mother(partNr)->pdgId()) == 7 || abs(part->mother(partNr)->pdgId()) == 8 ||
-		 abs(part->mother(partNr)->pdgId()) == 23 || abs(part->mother(partNr)->pdgId()) == 32  || 
-     abs(part->mother(partNr)->pdgId()) == 22) return part->mother(partNr);
+	    abs(part->mother(partNr)->pdgId()) == 7 || abs(part->mother(partNr)->pdgId()) == 8 ||
+	    abs(part->mother(partNr)->pdgId()) == 23 || abs(part->mother(partNr)->pdgId()) == 32  || 
+	    abs(part->mother(partNr)->pdgId()) == 22) return part->mother(partNr);
   }  
-   return nullptr;
+  return nullptr;
   
 }
 
