@@ -109,14 +109,15 @@ private:
   int bosonId_;
   double crossSec;
 
-  bool isCI_, debug_;
+  int debug_;
   edm::InputTag genPartsTag_;
-  int decayParticlePID_, status_, leptonId_;
+  int decayParticlePID_;
 
 
   // ----------member data ---------------------------
   
 };
+
 
 void Dimuon::beginJob()
 {
@@ -178,12 +179,9 @@ void Dimuon::beginJob()
 Dimuon::Dimuon(const edm::ParameterSet& iConfig)
 
 {
-  debug_=iConfig.getParameter<bool>("debug");
-  isCI_=iConfig.getParameter<bool>("isCI");
-  status_=iConfig.getParameter<int>("status");
+  debug_=iConfig.getParameter<int>("debug");
   genPartsTag_=iConfig.getParameter<edm::InputTag>("genPartsTag");
   decayParticlePID_ = iConfig.getParameter<int>("decayParticlePID");
-  leptonId_ = iConfig.getParameter<int>("leptonId");
   //now do what ever initialization is needed
 
 }
@@ -206,7 +204,7 @@ Dimuon::~Dimuon()
 void
 Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  //  isCI_ = true;
+
   using namespace edm;
   edm::Handle<reco::GenParticleCollection> genPartsHandle;
   iEvent.getByLabel(genPartsTag_,genPartsHandle);
@@ -233,14 +231,15 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       for(auto &part : genParts){
 	if((part.pdgId() == 1 || part.pdgId() == 2 || part.pdgId() == 3 || part.pdgId() == 4 || part.pdgId() == 5 || part.pdgId() == 6) && 
 	   (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
-	  std::cout << "\nFound the quark! " << "\nQuark is: " << part.pdgId() << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
+	  if(debug_ > 0){ std::cout << "\nFound the quark! " << "\nQuark is: " << part.pdgId() << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
 	    part.numberOfDaughters() << "\tFirst daughter is:"  << part.daughter(0)->pdgId() << "\tSecond daughter is: " << part.daughter(1)->pdgId() << std::endl;
+	  
 	  //      if(part.status() < -20 && part.status() > -30){ std::cout << "\nFound the Z boson!";
 	  std::cout << "\nkinematic properties of the particles are: " << std::endl;
 	  std::cout << "\npT1: " << part.daughter(0)->pt() << "\tpT2: " << part.daughter(1)->pt() << std::endl;
 	  std::cout << "\neta1: " << part.daughter(0)->eta() << "\teta2: " << part.daughter(1)->eta() << std::endl;
 	  std::cout << "\nphi1: " << part.daughter(0)->phi() << "\tphi2: " << part.daughter(1)->phi() << std::endl;
-	  
+	  }
 	  daughter1 = getLastDaughter(part.daughter(0), part.daughter(0)->pdgId());
 	  daughter2 = getLastDaughter(part.daughter(1), part.daughter(1)->pdgId());
 	  std::cout << "\nDaughter particle is: " << daughter1->pdgId() << "tStatus is: " << daughter1->status()
@@ -253,14 +252,14 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}
 
 	if(part.pdgId() == 23 && (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
-	  std::cout << "\nFound the Z boson! " << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
+	  if(debug_ > 0){std::cout << "\nFound the Z boson! " << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
 	    part.numberOfDaughters() << "\tFirst daughter is:"  << part.daughter(0)->pdgId() << "\tSecond daughter is: " << part.daughter(1)->pdgId() << std::endl;
 	  //      if(part.status() < -20 && part.status() > -30){ std::cout << "\nFound the Z boson!";
 	  std::cout << "\nkinematic properties of the particles are: " << std::endl;
 	  std::cout << "\npT1: " << part.daughter(0)->pt() << "\tpT2: " << part.daughter(1)->pt() << std::endl;
 	  std::cout << "\neta1: " << part.daughter(0)->eta() << "\teta2: " << part.daughter(1)->eta() << std::endl;
 	  std::cout << "\nphi1: " << part.daughter(0)->phi() << "\tphi2: " << part.daughter(1)->phi() << std::endl;
-	  
+	  }
 	  daughter1 = getLastDaughter(part.daughter(0), part.daughter(0)->pdgId());
 	  daughter2 = getLastDaughter(part.daughter(1), part.daughter(1)->pdgId());
 	  std::cout << "\nDaughter particle is: " << daughter1->pdgId() << "tStatus is: " << daughter1->status()
@@ -277,12 +276,11 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
 
 
-    if(debug_){
+    if(debug_ > 2){
       std::cout << "Eta of daughter1 is: " << daughter1->eta() << "\n";
       std::cout << "Eta of daughter2 is: " << daughter2->eta() << "\n";
     }
 
-    //    if(!isCI_){
       if(boson){
 	bosonId_=boson->pdgId();
 	bosonP4_.fill(boson->p4());
@@ -293,7 +291,6 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	h_Zphi ->Fill(boson->phi());
 	h_Zcharge->Fill(boson->charge());
       }
-      //    }
 
     if(daughter1->charge() > 0 && daughter2->charge() < 0){
       muMinus = daughter2;
@@ -306,7 +303,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     else return;
 
-    if(debug_){  
+    if(debug_ > 0){  
       std::cout<< "\n\nDaughter1: pId = " << muMinus->pdgId() << "\tpT = " << muMinus->pt() << "\teta = " 
 	       << muMinus->eta() << "\tphi = " << muMinus->phi() << "\tq = " << muMinus->charge();
       std::cout<< "\nDaughter2: pId = " << muPlus->pdgId() << "\tpT = " << muPlus->pt() << "\teta = " << muPlus->eta() << "\tphi = " << 
@@ -315,7 +312,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
   muMinusP4_.fill(muMinus->p4());
     muMinusPID_=muMinus->pdgId();
-    if(debug_){  
+    if(debug_ > 0){  
       std::cout<< "\n\nDaughter1: pId = " << muMinus->pdgId() << "\tpT = " << muMinus->pt() << "\teta = " 
 	       << muMinus->eta() << "\tphi = " << muMinus->phi() << "\tq = " << muMinus->charge();
     std::cout<< "\nDaughter2: pId = " << muPlus->pdgId() << "\tpT = " << muPlus->pt() << "\teta = " << muPlus->eta() << "\tphi = " << 
@@ -369,7 +366,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 bool Dimuon::isBoson(int pid)
 {
   if(pid==23 || abs(pid)==22 || pid==32){
-    if(debug_) std::cout << "\n\nFound Boson\n";
+    if(debug_ > 0) std::cout << "\n\nFound Boson\n";
     return true;
   }
   else return false;
@@ -377,7 +374,7 @@ bool Dimuon::isBoson(int pid)
 
 bool Dimuon::isMuon(int pid){
   if(abs(pid)==11 || abs(pid) ==13){
-    if(debug_) std::cout << "\n\nFound A Muon!\n";
+    if(debug_ > 0) std::cout << "\n\nFound A Muon!\n";
     return true;
   }
   else return false;
@@ -386,12 +383,12 @@ bool Dimuon::isMuon(int pid){
 bool Dimuon::checkBosonStatus( const reco::GenParticleCollection& genParts){
   const reco::Candidate* boson = getBoson(genParts);
   if(boson == nullptr){
-    if(debug_) std::cout << "\nBoson is: "  << boson;
+    if(debug_ > 0) std::cout << "\nBoson is: "  << boson;
     return false;
   }
 
   else if( boson->status() != 22){
-    if(debug_)  std::cout <<"\nBoson Status is: "<< boson->status();
+    if(debug_ > 0)  std::cout <<"\nBoson Status is: "<< boson->status();
     return false;
   }
  
@@ -402,7 +399,7 @@ const reco::Candidate* Dimuon::getBoson( const reco::GenParticleCollection& genP
 {
   for(auto &part : genParts){
     if(isBoson(part.pdgId())){
-      if(debug_){
+      if(debug_ > 1){
       std::cout << "\npId is: " << part.pdgId();
       std::cout << "\nStatus is: " << part.status();
       }
