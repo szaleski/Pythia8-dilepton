@@ -60,10 +60,17 @@ process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9::All')
 isDY = "on"
-isCI = "off"
+isCImumu = "off"
+isCIee = "off"
+
 if options.ciGen:
 	isDY = "off"
-	isCI = "on"
+	if options.pdgId == 11:
+		isCIee = "on"
+		isCImumu = "off"
+	else:
+		isCIee = "off"
+		isCImumu = "on"
 
 
 process.generator = cms.EDFilter("Pythia8GeneratorFilter",
@@ -80,10 +87,11 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
                         'ParticleDecays:tauMax = 10',
                         'Tune:pp 5',
                         'Tune:ee 3',
-			'WeakSingleBoson:ffbar2ffbar(s:gmZ)= %s'%(isDY),
-                        'ContactInteractions:QCffbar2mumubar = %s'%(isCI),
+ 			'WeakSingleBoson:ffbar2ffbar(s:gmZ)= %s'%(isDY),
+                        'ContactInteractions:QCffbar2eebar = %s'%(isCIee),
+                        'ContactInteractions:QCffbar2mumubar = %s'%(isCImumu),
                         '23:onMode = off',
-                        '23:onIfAny = 13',
+                        '23:onIfAny = '+str(options.pdgId),
 			'PartonLevel:ISR = '+str(options.ISR),
 			'PartonLevel:FSR = '+str(options.FSR),
 			'PhaseSpace:pTHatMin = '+str(options.pTMin),
@@ -116,7 +124,7 @@ process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
     fileName =
-cms.untracked.string('file:CIToMuMu_M%d_D%d_L%d_8TeV_pythia8_GEN_%d_Sep9.root'%(options.minMass,options.pTMin,options.Lambda,options.seed)),
+cms.untracked.string('file:CITo_PID%d_M%d_D%d_L%d_LL%d_LR_%d_RR_%d_13TeV_pythia8_GEN_Sep9.root'%(options.pdgId,options.minMass,options.pTMin,options.Lambda,options.helicityLL,options.helicityLR,options.helicityRR)),
     outputCommands = process.AODSIMEventContent.outputCommands
 )
 
