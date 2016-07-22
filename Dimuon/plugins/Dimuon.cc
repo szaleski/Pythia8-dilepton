@@ -98,6 +98,7 @@ private:
   TH1F *h_muPlusmass,*h_muPluspt,*h_muPluseta,*h_muPlusphi,*h_muPluscharge;
   TH1F *h_dphi,*h_dtheta, *h_dr, *h_thetaMuMinus,*h_thetaMuPlus;
   TH1F *h_massInvar, *h_dimuonPt, *h_dimuonEta, *h_dimuonPhi;
+  TH1F *h_cosTheta, *h_tanPhi, *h_csTheta, *h_csPhi;
 
   TH2F *h2_pt1_vs_pt2,*h2_eta1_vs_eta2,*h2_phi1_vs_phi2;
 
@@ -107,7 +108,7 @@ private:
   int muMinusPID_;
   int muPlusPID_;
   int bosonId_;
-  double crossSec;
+  double crossSec, cosTheta, tanPhi, csTheta, csPhi;
 
   int debug_;
   edm::InputTag genPartsTag_;
@@ -149,6 +150,12 @@ void Dimuon::beginJob()
   h_dimuonEta = fs->make<TH1F>("Dimuon eta", "Dimuon #eta", 100, -5, 5);
   h_dimuonPhi = fs->make<TH1F>("Dimuon Phi", "Dimuon #phi", 100, -3.15, 3.15);
 
+  h_cosTheta = fs->make<TH1F>("cosTheta", "cos #theta", 100, -1.01, 1.01);
+  h_tanPhi = fs->make<TH1F>("tanPhi", "tan #phi", 100, -1000.0, 1000.0);
+  h_csTheta = fs->make<TH1F>("csTheta", "#theta_{CS}", 100, -3.15, 3.15);
+  h_csPhi = fs->make<TH1F>("csPhi", "#phi_{CS}", 100, -3.15, 3.15);
+
+
   h2_pt1_vs_pt2   = fs->make<TH2F>( "pt1_vs_pt2"   , "p_{t,1} vs. p_{t,2}"   , 500,  0., 2500., 500,  0., 2500.);
   h2_eta1_vs_eta2 = fs->make<TH2F>( "eta1_vs_eta2" , "#eta_{1} vs. #eta_{2}" , 100, -5., 5.   , 100, -5., 5.   );
   h2_phi1_vs_phi2 = fs->make<TH2F>( "phi1_vs_phi2" , "#phi_{1} vs. #phi_{2}" , 100,  -3.15, 3.15  , 100,  -3.15, 3.15  );
@@ -162,6 +169,10 @@ void Dimuon::beginJob()
   tree_->Branch("decay2PID",&muPlusPID_,"decay2PID/I");
   tree_->Branch("bosonPID",&bosonId_,"bosonPID/I");
   tree_->Branch("crossSec", &crossSec, "crossSec/D");
+  tree_->Branch("cosTheta", &cosTheta, "cosTheta/D");
+  tree_->Branch("tanPhi", &tanPhi, "tanPhi/D");
+  tree_->Branch("csTheta", &csTheta, "csTheta/D");
+  tree_->Branch("csPhi", &csPhi, "csPhi/D");
   // tree_->Branch("pdfInfo",&pdfInfo_,PDFInfo::contents().c_str());
 };
 
@@ -226,14 +237,18 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   const reco::Candidate* muMinus;
   const reco::Candidate* muPlus;
   math::XYZTLorentzVectorD dimuon;
-  double dimuonPx, dimuonPz, dimuonPt, pseudorapidity, Phi;
-  
+  double dimuonPx, dimuonPy, dimuonPz, dimuonPt, pseudorapidity, Phi, mu1Energy, mu2Energy, dimuonQ;
+  double thetaCos, thetaCS, phiTan, phiCS;
+  double muPlusKPlus, muPlusKMinus, muMinusKPlus, muMinusKMinus, invariantK;
+
+
       for(auto &part : genParts){
 	if((part.pdgId() == 1 || part.pdgId() == 2 || part.pdgId() == 3 || part.pdgId() == 4 || part.pdgId() == 5 || part.pdgId() == 6) && 
 	   (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
 	  if(debug_ > 0){ std::cout << "\nFound the quark! " << "\nQuark is: " << part.pdgId() << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
 	    part.numberOfDaughters() << "\tFirst daughter is:"  << part.daughter(0)->pdgId() << "\tSecond daughter is: " << part.daughter(1)->pdgId() << std::endl;
-	  
+	    //	    mother1 = getMother(part.mother(0), 2212);
+	    //std::cout << "\nQuark mother is:" << mother1->pdgId() << std::endl;
 	  //      if(part.status() < -20 && part.status() > -30){ std::cout << "\nFound the Z boson!";
 	  std::cout << "\nkinematic properties of the particles are: " << std::endl;
 	  std::cout << "\npT1: " << part.daughter(0)->pt() << "\tpT2: " << part.daughter(1)->pt() << std::endl;
@@ -251,7 +266,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  }
 	}
 
-	if(part.pdgId() == 23 && (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
+	else if(part.pdgId() == 23 && (abs(part.daughter(0)->pdgId()) == 11 || abs(part.daughter(0)->pdgId()) == 13)){
 	  if(debug_ > 0){std::cout << "\nFound the Z boson! " << "\tStatus is: " << part.status() << "\tNumber of daughters are: " <<
 	    part.numberOfDaughters() << "\tFirst daughter is:"  << part.daughter(0)->pdgId() << "\tSecond daughter is: " << part.daughter(1)->pdgId() << std::endl;
 	  //      if(part.status() < -20 && part.status() > -30){ std::cout << "\nFound the Z boson!";
@@ -337,13 +352,64 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     h_muPluscharge->Fill(muPlus->charge());
     h_thetaMuPlus->Fill(muPlus->theta());    
 
+    muPlusKPlus = (1/sqrt(2))*(muPlus->energy() + muPlus->pz());
+    muPlusKMinus = (1/sqrt(2))*(muPlus->energy() - muPlus->pz());
+    muMinusKPlus = (1/sqrt(2))*(muMinus->energy() + muMinus->pz());
+    muMinusKMinus = (1/sqrt(2))*(muMinus->energy() - muMinus->pz());
+
+    invariantK = (muPlusKPlus*muMinusKMinus - muMinusKPlus*muPlusKMinus);
+    std::cout << "\n\nInvariantK is: " << invariantK << std::endl;
+
     dimuon = muMinus->p4() + muPlus->p4();
 
     dimuonPt =dimuon.pt();
     dimuonPz = dimuon.pz();
     pseudorapidity = asinh(dimuonPz/dimuonPt);
     dimuonPx = dimuon.px();
+    dimuonPy = dimuon.py();
     Phi = acos(dimuonPx/dimuonPt);
+    dimuonQ = sqrt(pow(dimuon.energy(),2) - pow(dimuon.pt(),2) - pow(dimuon.pz(),2));
+    std::cout << "\n\nDimuon Energy is: " << dimuon.energy() << std::endl << std::endl;
+    
+    double denominatorTheta, denominatorPhi1, denominatorPhi2, numeratorPhi1, numeratorPhi2;
+    double denominatorPhi, numeratorPhi;
+    double deltaX, deltaY;
+    
+    denominatorTheta = dimuonQ*sqrt(pow(dimuonQ, 2) + pow(dimuon.pt(), 2));
+    thetaCos = (2/denominatorTheta)*invariantK;
+    thetaCS = acos(thetaCos);
+
+    denominatorPhi1 = dimuonQ*dimuon.pt();
+    numeratorPhi1 = sqrt(pow(dimuonQ, 2) + pow(dimuon.pt(), 2));
+    deltaX = muPlus->px() - muMinus->px();
+    deltaY = muPlus->py() - muMinus->py();
+    denominatorPhi2 = ((deltaX*dimuon.px()) + (deltaY*dimuon.py()));
+    numeratorPhi2 = ((deltaX*dimuon.py()) + (deltaY*dimuon.px()));
+    numeratorPhi = numeratorPhi1*numeratorPhi2;
+    denominatorPhi = denominatorPhi1 * denominatorPhi2;
+
+    phiTan = numeratorPhi/denominatorPhi;
+    phiCS = atan(phiTan);
+
+
+    mu1Energy = muPlus->energy();
+    mu2Energy = muMinus->energy();
+    std::cout << "\n\nmuon Energies are: " << mu1Energy << "__" << mu2Energy << std::endl << std::endl;
+    std::cout << "\ndimuon px_py_pz are: "<< dimuonPx << "_" << dimuonPy << "_" << dimuonPz << std::endl;
+ 
+    cosTheta=thetaCos;
+    tanPhi=phiTan;
+    csTheta=thetaCS;
+    csPhi=phiCS;
+
+
+    h_cosTheta->Fill(thetaCos);
+    h_csTheta->Fill(thetaCS);
+    h_tanPhi->Fill(phiTan);
+    h_csPhi->Fill(phiCS);
+
+    std::cout << "\n\n\ncos(Theta_CS) = " << thetaCos << "\tThetaCS = " << thetaCS << std::endl;
+    std::cout << "\n\n\nTan(phi_CS) = " << phiTan << "\tPhiCS = " << phiCS << std::endl;
 
     h_dphi->Fill(TVector2::Phi_mpi_pi(muMinus->phi()- muPlus->phi()));
     h_dtheta->Fill(TVector2::Phi_mpi_pi(muMinus->theta()- muPlus->theta()));
