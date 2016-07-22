@@ -14,13 +14,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200000) )
 process.source = cms.Source("PoolSource",
             # replace 'myfile.root' with the source file you want to use
                         fileNames = cms.untracked.vstring(
-                                  'file:/afs/cern.ch/work/s/szaleski/private/CMSSW_744_MCGen/src/GenStudy/Dimuon/test/CIToEE_M300_D0_L22000_13TeV_pythia8_GEN_LL0_LR1_RR0_JuL14.root'
+                                  'file:/afs/cern.ch/work/s/szaleski/private/CMSSW_744_MCGen/src/GenStudy/Dimuon/test/dielectronCIL22DesRR/CIToEE_M300_D0_L22000_13TeV_pythia8_GEN_LL0_LR0_RR1_JuL14.root'
                                 )
                             )
 
 from GenStudy.Dimuon.Dimuon_cfi import *
 process.Dimuon=dimuon.clone()
-process.Dimuon.debug=True
+process.Dimuon.debug=3
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string("Pythia8_Jul18_CIEE_13TeV_CIM300.root")                                   
