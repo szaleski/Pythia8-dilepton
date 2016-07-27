@@ -20,7 +20,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200000) )
 process.source = cms.Source("PoolSource",
             # replace 'myfile.root' with the source file you want to use
                         fileNames = cms.untracked.vstring(
-                                  'file:$CMSSW_BASE/src/GenStudy/Dimuon/test/CITo_PID11_M300_D0_L1000_LL0_LR_0_RR_0_13TeV_pythia8_GEN_Sep9.root'
+                                  'file:$CMSSW_BASE/src/GenStudy/Dimuon/test/%s'%(options.inFile)
                                 )
                             )
 
