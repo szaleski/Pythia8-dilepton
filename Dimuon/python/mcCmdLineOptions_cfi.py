@@ -79,3 +79,8 @@ def registerDefaultMCOptions(options):
                       VarParsing.VarParsing.multiplicity.singleton,
                       VarParsing.VarParsing.varType.string,
                       "Turn FSR off")
+    options.register ('ULE',
+                      "on",
+                      VarParsing.VarParsing.multiplicity.singleton,
+                      VarParsing.VarParsing.varType.string,
+                      "UnderLying Event")
