@@ -1,3 +1,9 @@
+import FWCore.ParameterSet.VarParsing as VarParsing
+options = VarParsing.VarParsing ('analysis')
+from GenStudy.Dimuon.dileptonMcCmndLineOptions import registerDefaultMCOptions
+registerDefaultMCOptions(options)
+options.parseArguments()
+
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Demo")
@@ -14,7 +20,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200000) )
 process.source = cms.Source("PoolSource",
             # replace 'myfile.root' with the source file you want to use
                         fileNames = cms.untracked.vstring(
-                                  'file:/afs/cern.ch/work/s/szaleski/private/CMSSW_744_MCGen/src/GenStudy/Dimuon/test/dielectronCIL22DesRR/CIToEE_M300_D0_L22000_13TeV_pythia8_GEN_LL0_LR0_RR1_JuL14.root'
+                                  'file:$CMSSW_BASE/src/GenStudy/Dimuon/test/CITo_PID11_M300_D0_L1000_LL0_LR_0_RR_0_13TeV_pythia8_GEN_Sep9.root'
                                 )
                             )
 
@@ -23,9 +29,10 @@ process.Dimuon=dimuon.clone()
 process.Dimuon.debug=3
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string("Pythia8_Jul18_CIEE_13TeV_CIM300.root")                                   
+                                   fileName = cms.string("file:%s.root"%(options.filename)),  
+#                                   fileName = cms.string("Pythia8_Jul22_CIEE_13TeV_DYM1300.root")  
 #                                   fileName = cms.string("Pythia8_Jul6_CIEE_13TeV_CIM1500LLCon.root")
-#                                   fileName = cms.string("Pythia8_Jul6_CIEE_13TeV_CIM300LLConTest.root")
+#                                   fileName = cms.string("Pythia8_Jul6_CIEE_13TeV_CIM1800LLConTest.root")
 )
 
 
