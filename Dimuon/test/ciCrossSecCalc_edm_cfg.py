@@ -101,8 +101,8 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 			'PhaseSpace:pTHatMax = '+str(options.pTMax),
 			'ContactInteractions:Lambda = '+str(options.Lambda),
 			'ContactInteractions:etaLL = '+str(options.helicityLL),
-			'ContactInteractions:etaRR = '+str(options.helicityLR),
-			'ContactInteractions:etaLR = '+str(options.helicityRR),
+			'ContactInteractions:etaLR = '+str(options.helicityLR),
+			'ContactInteractions:etaRR = '+str(options.helicityRR),
 
                 ),
                 parameterSets = cms.vstring('processParameters')
