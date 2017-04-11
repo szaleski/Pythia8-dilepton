@@ -99,6 +99,7 @@ private:
   TH1F *h_dphi,*h_dtheta, *h_dr, *h_thetaMuMinus,*h_thetaMuPlus;
   TH1F *h_massInvar, *h_dimuonPt, *h_dimuonEta, *h_dimuonPhi;
   TH1F *h_cosTheta, *h_tanPhi, *h_csTheta, *h_csPhi;
+  TH1F *h_cosThetaPlusInvariantMass, *h_cosThetaMinusInvariantMass;
 
   TH2F *h2_pt1_vs_pt2,*h2_eta1_vs_eta2,*h2_phi1_vs_phi2;
 
@@ -109,6 +110,7 @@ private:
   int muPlusPID_;
   int bosonId_;
   double crossSec, cosTheta, tanPhi, csTheta, csPhi;
+  double mCosThetaPlus, mCosThetaMinus;
 
   int debug_;
   edm::InputTag genPartsTag_;
@@ -145,7 +147,7 @@ void Dimuon::beginJob()
   h_dr = fs->make<TH1F>("delta r", "#delta r", 100, 0, 10);
   h_thetaMuMinus = fs->make<TH1F>("theta muMinus", "#theta", 100, -3.15, 3.15);      
   h_thetaMuPlus = fs->make<TH1F>("theta muPlus", "#theta", 100, -3.15, 3.15); 
-  h_massInvar = fs->make<TH1F>("Invariant mass", "Invariant mass", 1000, 0., 600.);
+  h_massInvar = fs->make<TH1F>("Invariant mass", "Invariant mass", 350, 0., 3500.);
   h_dimuonPt = fs->make<TH1F>("Dimuon Pt", "Dimuon Pt", 500, 0, 2500);
   h_dimuonEta = fs->make<TH1F>("Dimuon eta", "Dimuon #eta", 100, -5, 5);
   h_dimuonPhi = fs->make<TH1F>("Dimuon Phi", "Dimuon #phi", 100, -3.15, 3.15);
@@ -154,7 +156,8 @@ void Dimuon::beginJob()
   h_tanPhi = fs->make<TH1F>("tanPhi", "tan #phi", 100, -1000.0, 1000.0);
   h_csTheta = fs->make<TH1F>("csTheta", "#theta_{CS}", 100, -3.15, 3.15);
   h_csPhi = fs->make<TH1F>("csPhi", "#phi_{CS}", 100, -3.15, 3.15);
-
+  h_cosThetaMinusInvariantMass = fs->make<TH1F>("InvariantMass_cosThetaMinus", "InvariantMass_cosThetaMinus", 350, 0., 3500.);
+  h_cosThetaPlusInvariantMass = fs->make<TH1F>("InvariantMass_cosThetaPlus", "InvariantMass_cosThetaPlus", 350, 0., 3500.);
 
   h2_pt1_vs_pt2   = fs->make<TH2F>( "pt1_vs_pt2"   , "p_{t,1} vs. p_{t,2}"   , 500,  0., 2500., 500,  0., 2500.);
   h2_eta1_vs_eta2 = fs->make<TH2F>( "eta1_vs_eta2" , "#eta_{1} vs. #eta_{2}" , 100, -5., 5.   , 100, -5., 5.   );
@@ -173,6 +176,8 @@ void Dimuon::beginJob()
   tree_->Branch("tanPhi", &tanPhi, "tanPhi/D");
   tree_->Branch("csTheta", &csTheta, "csTheta/D");
   tree_->Branch("csPhi", &csPhi, "csPhi/D");
+  tree_->Branch("mCosThetaPlus", &mCosThetaPlus, "mCosThetaPlus/D");
+  tree_->Branch("mCosThetaMinus", &mCosThetaMinus, "mCosThetaMinus/D");
   // tree_->Branch("pdfInfo",&pdfInfo_,PDFInfo::contents().c_str());
 };
 
@@ -374,9 +379,10 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     double denominatorTheta, denominatorPhi1, denominatorPhi2, numeratorPhi1, numeratorPhi2;
     double denominatorPhi, numeratorPhi;
     double deltaX, deltaY;
-    
+    double invariantMass;
+
     denominatorTheta = dimuonQ*sqrt(pow(dimuonQ, 2) + pow(dimuon.pt(), 2));
-    thetaCos = (2/denominatorTheta)*invariantK;
+    thetaCos = (dimuon.pz()/fabs(dimuon.pz()))*(2/denominatorTheta)*invariantK;
     thetaCS = acos(thetaCos);
 
     denominatorPhi1 = dimuonQ*dimuon.pt();
@@ -408,8 +414,24 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     h_tanPhi->Fill(phiTan);
     h_csPhi->Fill(phiCS);
 
+    
+
     std::cout << "\n\n\ncos(Theta_CS) = " << thetaCos << "\tThetaCS = " << thetaCS << std::endl;
     std::cout << "\n\n\nTan(phi_CS) = " << phiTan << "\tPhiCS = " << phiCS << std::endl;
+
+    invariantMass = sqrt(2 * daughter1->pt() * daughter2->pt() *( cosh(daughter1->eta() - daughter2->eta()) - cos(TVector2::Phi_mpi_pi(daughter1->phi() - daughter2->phi()))));
+
+
+    if(thetaCos < 0.0){
+      h_cosThetaMinusInvariantMass->Fill(invariantMass);
+      mCosThetaMinus = invariantMass;
+    }
+    else{
+      h_cosThetaPlusInvariantMass->Fill(invariantMass);
+      mCosThetaPlus = invariantMass;
+    }
+
+   
 
     h_dphi->Fill(TVector2::Phi_mpi_pi(muMinus->phi()- muPlus->phi()));
     h_dtheta->Fill(TVector2::Phi_mpi_pi(muMinus->theta()- muPlus->theta()));
