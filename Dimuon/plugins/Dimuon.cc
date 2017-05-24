@@ -65,8 +65,8 @@ private:
   bool checkBosonStatus(const reco::GenParticleCollection& genParts);
 
 
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
-  //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
+  //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+  virtual void endRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup) override;
   //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
@@ -99,6 +99,7 @@ private:
   TH1F *h_dphi,*h_dtheta, *h_dr, *h_thetaMuMinus,*h_thetaMuPlus;
   TH1F *h_massInvar, *h_dimuonPt, *h_dimuonEta, *h_dimuonPhi;
   TH1F *h_cosTheta, *h_tanPhi, *h_csTheta, *h_csPhi;
+  TH1F *h_cosThetaPlusInvariantMass, *h_cosThetaMinusInvariantMass;
 
   TH2F *h2_pt1_vs_pt2,*h2_eta1_vs_eta2,*h2_phi1_vs_phi2;
 
@@ -109,11 +110,14 @@ private:
   int muPlusPID_;
   int bosonId_;
   double crossSec, cosTheta, tanPhi, csTheta, csPhi;
+  double mCosThetaPlus, mCosThetaMinus;
 
   int debug_;
   edm::InputTag genPartsTag_;
   int decayParticlePID_;
-
+  edm::InputTag genInfoProduct_;
+  edm::EDGetTokenT<GenRunInfoProduct> genInfoProductToken_;
+  edm::EDGetTokenT<reco::GenParticleCollection> genPartsToken_;
 
   // ----------member data ---------------------------
   
@@ -154,6 +158,8 @@ void Dimuon::beginJob()
   h_tanPhi = fs->make<TH1F>("tanPhi", "tan #phi", 100, -1000.0, 1000.0);
   h_csTheta = fs->make<TH1F>("csTheta", "#theta_{CS}", 100, -3.15, 3.15);
   h_csPhi = fs->make<TH1F>("csPhi", "#phi_{CS}", 100, -3.15, 3.15);
+  h_cosThetaMinusInvariantMass = fs->make<TH1F>("InvariantMass_cosThetaMinus", "InvariantMass_cosThetaMinus", 350, 0., 3500.);
+  h_cosThetaPlusInvariantMass = fs->make<TH1F>("InvariantMass_cosThetaPlus", "InvariantMass_cosThetaPlus", 350, 0., 3500.);
 
 
   h2_pt1_vs_pt2   = fs->make<TH2F>( "pt1_vs_pt2"   , "p_{t,1} vs. p_{t,2}"   , 500,  0., 2500., 500,  0., 2500.);
@@ -173,6 +179,8 @@ void Dimuon::beginJob()
   tree_->Branch("tanPhi", &tanPhi, "tanPhi/D");
   tree_->Branch("csTheta", &csTheta, "csTheta/D");
   tree_->Branch("csPhi", &csPhi, "csPhi/D");
+  tree_->Branch("mCosThetaPlus", &mCosThetaPlus, "mCosThetaPlus/D");
+  tree_->Branch("mCosThetaMinus", &mCosThetaMinus, "mCosThetaMinus/D");
   // tree_->Branch("pdfInfo",&pdfInfo_,PDFInfo::contents().c_str());
 };
 
@@ -190,11 +198,17 @@ void Dimuon::beginJob()
 Dimuon::Dimuon(const edm::ParameterSet& iConfig)
 
 {
+
+
   debug_=iConfig.getParameter<int>("debug");
   genPartsTag_=iConfig.getParameter<edm::InputTag>("genPartsTag");
   decayParticlePID_ = iConfig.getParameter<int>("decayParticlePID");
+  genInfoProduct_ = iConfig.getParameter<edm::InputTag>("genInfoProduct");
+  
   //now do what ever initialization is needed
 
+  genInfoProductToken_ = consumes<GenRunInfoProduct,edm::InRun>(genInfoProduct_);
+  genPartsToken_ = consumes<reco::GenParticleCollection>(genPartsTag_);
 }
 
 
@@ -218,9 +232,8 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   using namespace edm;
   edm::Handle<reco::GenParticleCollection> genPartsHandle;
-  iEvent.getByLabel(genPartsTag_,genPartsHandle);
+  iEvent.getByToken(genPartsToken_,genPartsHandle);
   const reco::GenParticleCollection& genParts = *genPartsHandle;
-
 
   bosonId_=0;
   bosonP4_.clear();
@@ -374,6 +387,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     double denominatorTheta, denominatorPhi1, denominatorPhi2, numeratorPhi1, numeratorPhi2;
     double denominatorPhi, numeratorPhi;
     double deltaX, deltaY;
+    double invariantMass;
     
     denominatorTheta = dimuonQ*sqrt(pow(dimuonQ, 2) + pow(dimuon.pt(), 2));
     thetaCos = (2/denominatorTheta)*invariantK;
@@ -410,6 +424,18 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     std::cout << "\n\n\ncos(Theta_CS) = " << thetaCos << "\tThetaCS = " << thetaCS << std::endl;
     std::cout << "\n\n\nTan(phi_CS) = " << phiTan << "\tPhiCS = " << phiCS << std::endl;
+
+    invariantMass = sqrt(2 * daughter1->pt() * daughter2->pt() *( cosh(daughter1->eta() - daughter2->eta()) - cos(TVector2::Phi_mpi_pi(daughter1->phi() - daughter2->phi()))));
+
+
+    if(thetaCos < 0.0){
+      h_cosThetaMinusInvariantMass->Fill(invariantMass);
+      mCosThetaMinus = invariantMass;
+    }
+    else{
+      h_cosThetaPlusInvariantMass->Fill(invariantMass);
+      mCosThetaPlus = invariantMass;
+    }
 
     h_dphi->Fill(TVector2::Phi_mpi_pi(muMinus->phi()- muPlus->phi()));
     h_dtheta->Fill(TVector2::Phi_mpi_pi(muMinus->theta()- muPlus->theta()));
@@ -519,26 +545,28 @@ Dimuon::endJob()
 
 // ------------ method called when starting to processes a run  ------------
   
-void 
+/*void 
 Dimuon::beginRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup)
 {
-  edm::Handle< GenRunInfoProduct > genInfoProduct;
-  iRun.getByLabel("generator", genInfoProduct );
+
+
+}
+*/
+
+// ------------ method called when ending the processing of a run  ------------
+
+void 
+  Dimuon::endRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup)
+  {
+   edm::Handle< GenRunInfoProduct > genInfoProduct;
+  iRun.getByToken(genInfoProductToken_, genInfoProduct );
   crossSec = genInfoProduct->internalXSec().value();
 
   std::cout<< "Cross Section is: "  << crossSec << std::endl;  
-
-}
-  
-
-// ------------ method called when ending the processing of a run  ------------
-/*
-  void 
-  Dimuon::endRun(edm::Run const&, edm::EventSetup const&)
-  {
+ 
   }
-*/
 
+  
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
   void 
