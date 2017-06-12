@@ -149,7 +149,7 @@ void Dimuon::beginJob()
   h_dr = fs->make<TH1F>("delta r", "#delta r", 100, 0, 10);
   h_thetaMuMinus = fs->make<TH1F>("theta muMinus", "#theta", 100, -3.15, 3.15);      
   h_thetaMuPlus = fs->make<TH1F>("theta muPlus", "#theta", 100, -3.15, 3.15); 
-  h_massInvar = fs->make<TH1F>("Invariant mass", "Invariant mass", 1000, 0., 600.);
+  h_massInvar = fs->make<TH1F>("Invariant mass", "Invariant mass", 350, 0., 3500.);
   h_dimuonPt = fs->make<TH1F>("Dimuon Pt", "Dimuon Pt", 500, 0, 2500);
   h_dimuonEta = fs->make<TH1F>("Dimuon eta", "Dimuon #eta", 100, -5, 5);
   h_dimuonPhi = fs->make<TH1F>("Dimuon Phi", "Dimuon #phi", 100, -3.15, 3.15);
@@ -160,7 +160,6 @@ void Dimuon::beginJob()
   h_csPhi = fs->make<TH1F>("csPhi", "#phi_{CS}", 100, -3.15, 3.15);
   h_cosThetaMinusInvariantMass = fs->make<TH1F>("InvariantMass_cosThetaMinus", "InvariantMass_cosThetaMinus", 350, 0., 3500.);
   h_cosThetaPlusInvariantMass = fs->make<TH1F>("InvariantMass_cosThetaPlus", "InvariantMass_cosThetaPlus", 350, 0., 3500.);
-
 
   h2_pt1_vs_pt2   = fs->make<TH2F>( "pt1_vs_pt2"   , "p_{t,1} vs. p_{t,2}"   , 500,  0., 2500., 500,  0., 2500.);
   h2_eta1_vs_eta2 = fs->make<TH2F>( "eta1_vs_eta2" , "#eta_{1} vs. #eta_{2}" , 100, -5., 5.   , 100, -5., 5.   );
@@ -388,9 +387,9 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     double denominatorPhi, numeratorPhi;
     double deltaX, deltaY;
     double invariantMass;
-    
+
     denominatorTheta = dimuonQ*sqrt(pow(dimuonQ, 2) + pow(dimuon.pt(), 2));
-    thetaCos = (2/denominatorTheta)*invariantK;
+    thetaCos = (dimuon.pz()/fabs(dimuon.pz()))*(2/denominatorTheta)*invariantK;
     thetaCS = acos(thetaCos);
 
     denominatorPhi1 = dimuonQ*dimuon.pt();
@@ -422,6 +421,8 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     h_tanPhi->Fill(phiTan);
     h_csPhi->Fill(phiCS);
 
+    
+
     std::cout << "\n\n\ncos(Theta_CS) = " << thetaCos << "\tThetaCS = " << thetaCS << std::endl;
     std::cout << "\n\n\nTan(phi_CS) = " << phiTan << "\tPhiCS = " << phiCS << std::endl;
 
@@ -436,6 +437,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       h_cosThetaPlusInvariantMass->Fill(invariantMass);
       mCosThetaPlus = invariantMass;
     }
+
 
     h_dphi->Fill(TVector2::Phi_mpi_pi(muMinus->phi()- muPlus->phi()));
     h_dtheta->Fill(TVector2::Phi_mpi_pi(muMinus->theta()- muPlus->theta()));
