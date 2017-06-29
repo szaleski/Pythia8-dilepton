@@ -550,7 +550,12 @@ Dimuon::endJob()
 /*void 
 Dimuon::beginRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup)
 {
-
+   edm::Handle< GenRunInfoProduct > genInfoProduct;
+  iRun.getByToken(genInfoProductToken_, genInfoProduct );
+  crossSec = genInfoProduct->internalXSec().value();
+  //  tree_->Fill();
+  std::cout<< "Cross Section is: "  << crossSec << std::endl;  
+ 
 
 }
 */
@@ -563,7 +568,6 @@ void
    edm::Handle< GenRunInfoProduct > genInfoProduct;
   iRun.getByToken(genInfoProductToken_, genInfoProduct );
   crossSec = genInfoProduct->internalXSec().value();
-
   std::cout<< "Cross Section is: "  << crossSec << std::endl;  
  
   }
