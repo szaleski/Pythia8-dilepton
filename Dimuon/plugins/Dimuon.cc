@@ -65,8 +65,8 @@ private:
   bool checkBosonStatus(const reco::GenParticleCollection& genParts);
 
 
-  //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
-  virtual void endRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup) override;
+  virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+  //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
   //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
@@ -115,9 +115,7 @@ private:
   int debug_;
   edm::InputTag genPartsTag_;
   int decayParticlePID_;
-  edm::InputTag genInfoProduct_;
-  edm::EDGetTokenT<GenRunInfoProduct> genInfoProductToken_;
-  edm::EDGetTokenT<reco::GenParticleCollection> genPartsToken_;
+
 
   // ----------member data ---------------------------
   
@@ -197,17 +195,11 @@ void Dimuon::beginJob()
 Dimuon::Dimuon(const edm::ParameterSet& iConfig)
 
 {
-
-
   debug_=iConfig.getParameter<int>("debug");
   genPartsTag_=iConfig.getParameter<edm::InputTag>("genPartsTag");
   decayParticlePID_ = iConfig.getParameter<int>("decayParticlePID");
-  genInfoProduct_ = iConfig.getParameter<edm::InputTag>("genInfoProduct");
-  
   //now do what ever initialization is needed
 
-  genInfoProductToken_ = consumes<GenRunInfoProduct,edm::InRun>(genInfoProduct_);
-  genPartsToken_ = consumes<reco::GenParticleCollection>(genPartsTag_);
 }
 
 
@@ -231,8 +223,9 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   using namespace edm;
   edm::Handle<reco::GenParticleCollection> genPartsHandle;
-  iEvent.getByToken(genPartsToken_,genPartsHandle);
+  iEvent.getByLabel(genPartsTag_,genPartsHandle);
   const reco::GenParticleCollection& genParts = *genPartsHandle;
+
 
   bosonId_=0;
   bosonP4_.clear();
@@ -438,6 +431,7 @@ Dimuon::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       mCosThetaPlus = invariantMass;
     }
 
+   
 
     h_dphi->Fill(TVector2::Phi_mpi_pi(muMinus->phi()- muPlus->phi()));
     h_dtheta->Fill(TVector2::Phi_mpi_pi(muMinus->theta()- muPlus->theta()));
@@ -547,32 +541,26 @@ Dimuon::endJob()
 
 // ------------ method called when starting to processes a run  ------------
   
-/*void 
+void 
 Dimuon::beginRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup)
 {
-   edm::Handle< GenRunInfoProduct > genInfoProduct;
-  iRun.getByToken(genInfoProductToken_, genInfoProduct );
+  edm::Handle< GenRunInfoProduct > genInfoProduct;
+  iRun.getByLabel("generator", genInfoProduct );
   crossSec = genInfoProduct->internalXSec().value();
-  //  tree_->Fill();
+
   std::cout<< "Cross Section is: "  << crossSec << std::endl;  
- 
 
 }
-*/
+  
 
 // ------------ method called when ending the processing of a run  ------------
-
-void 
-  Dimuon::endRun(edm::Run const& iRun, edm::EventSetup const& iEventSetup)
+/*
+  void 
+  Dimuon::endRun(edm::Run const&, edm::EventSetup const&)
   {
-   edm::Handle< GenRunInfoProduct > genInfoProduct;
-  iRun.getByToken(genInfoProductToken_, genInfoProduct );
-  crossSec = genInfoProduct->internalXSec().value();
-  std::cout<< "Cross Section is: "  << crossSec << std::endl;  
- 
   }
+*/
 
-  
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
   void 
