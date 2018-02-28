@@ -35,7 +35,7 @@ process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.MessageLogger.cerr.FwkReport = cms.untracked.PSet(
-    reportEvery = cms.untracked.int32(500),
+    reportEvery = cms.untracked.int32(1000),
     limit = cms.untracked.int32(10000000)
 )
 process.maxEvents = cms.untracked.PSet(
@@ -58,7 +58,7 @@ process.RandomNumberGeneratorService.generator.initialSeed = options.seed*10000
 # Other statements
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9::All')
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6','')
 isDY = "on"
 isCImumu = "off"
 isCIee = "off"
@@ -99,11 +99,10 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
                         'PhaseSpace:mHatMin = '+str(options.minMass),
                         'PhaseSpace:mHatMax = '+str(options.maxMass),
 			'PhaseSpace:pTHatMax = '+str(options.pTMax),
-			'ContactInteractions:Lambda = '+str(options.Lambda),
 			'ContactInteractions:etaLL = '+str(options.helicityLL),
 			'ContactInteractions:etaLR = '+str(options.helicityLR),
 			'ContactInteractions:etaRR = '+str(options.helicityRR),
-
+			'ContactInteractions:Lambda = '+str(options.Lambda),
                 ),
                 parameterSets = cms.vstring('processParameters')
         )
@@ -125,7 +124,7 @@ process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
     fileName =
-cms.untracked.string('file:CITo_PID%d_M%d_D%d_L%d_LL%d_LR_%d_RR_%d_13TeV_pythia8_GEN_Sep9.root'%(options.pdgId,options.minMass,options.pTMin,options.Lambda,options.helicityLL,options.helicityLR,options.helicityRR)),
+cms.untracked.string('file:CITo_PID%d_M%d_D%d_L%d_LL%d_LR_%d_RR_%d_13TeV_pythia8_GEN.root'%(options.pdgId,options.minMass,options.pTMin,options.Lambda,options.helicityLL,options.helicityLR,options.helicityRR)),
     outputCommands = process.AODSIMEventContent.outputCommands
 )
 
