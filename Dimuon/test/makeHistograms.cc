@@ -256,7 +256,7 @@ void Plot( TCanvas *c, TH1F * hist, TFile *f, std::string const & quantity, std:
   hist->SetLineColor(kAzure + 4);
   hist->SetLineWidth(2);
   hist->SetLineStyle(1);
-  hist->SetStats(0);
+  //hist->SetStats(0);                       // Remove Stats box
   //     h_InvariantMass->SetMarkerStyle(33);                                                                                                                                     
   hist->Draw();
   
