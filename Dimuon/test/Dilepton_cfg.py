@@ -20,10 +20,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
             # replace 'myfile.root' with the source file you want to use
                             fileNames = cms.untracked.vstring(
-        'root://cmsxrootd.fnal.gov//store/mc/RunIISummer16MiniAODv2/CITo2Mu_M300_CUETP8M1_Lam22TeVConLL_13TeV_Pythia8_Corrected-v3/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/62DF9A66-1B3B-E711-AFFB-3417EBE5291B.root',
-               #                                  'file:$CMSSW_BASE/src/GenStudy/Dimuon/test/%s'%(options.inFile)
-#                                   'root://cmsxrootd.fnal.gov//store/mc/RunIISummer16MiniAODv2/CITo2E_M300_CUETP8M1_Lam10TeVConLL_13TeV-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/E0A1E641-EED8-E611-BE16-0CC47A57D066.root'                               
-                                )
+#        'root://cmsxrootd.fnal.gov//store/mc/RunIISummer16MiniAODv2/CITo2Mu_M300_CUETP8M1_Lam22TeVConLL_13TeV_Pythia8_Corrected-v3/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/62DF9A66-1B3B-E711-AFFB-3417EBE5291B.root',
+                                                 'file:$CMSSW_BASE/src/GenStudy/Dimuon/test/%s'%(options.inFile)
+#                                   'root://cmsxrootd.fnal.gov//store/group/lpcci2dileptons/CITo2Mu_GENSIM/MuMu_GENSIM/170609_183422/0000/EXO-RunIISummer15GS-09252_1.root',
+#        'root://cmsxrootd.fnal.gov///store/user/szaleski/CITo2E_GENSIM_Lam10/EE_GENSIM_LLConM2000/170814_202655/0000/EXO-RunIISummer15GS-09252_20.root'
+#        'root://cmsxrootd.fnal.gov//store/group/lpcci2dileptons/CITo2Mu_GENSIM/MuMu_GENSIM/170609_175824/0000/EXO-RunIISummer15GS-09252_1.root'
+#        'root://cmsxrootd.fnal.gov//store/group/lpcci2dileptons/CITo2Mu_GENSIM/MuMu_GENSIM/170609_175824/0000/EXO-RunIISummer15GS-09252_2.root'
+)
                             )
 
 from GenStudy.Dimuon.Dimuon_cfi import *
