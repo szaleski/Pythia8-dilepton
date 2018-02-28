@@ -7,7 +7,6 @@ This packages is designed to perform GEN-only private MC productions using the C
 First create a clean CMSSW_8_0_21 release area
 
 
-```
 
 # Outdated CMSSW_7_4_4 Instructions (Valid for 2015 running)
 In order to check this out you should have checked out a CMSSW release.
