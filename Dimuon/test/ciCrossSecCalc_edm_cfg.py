@@ -58,7 +58,7 @@ process.RandomNumberGeneratorService.generator.initialSeed = options.seed*10000
 # Other statements
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9::All')
+process.GlobalTag = GlobalTag(process.GlobalTag, '93X_upgrade2023_realistic_v3')
 isDY = "on"
 isCImumu = "off"
 isCIee = "off"
