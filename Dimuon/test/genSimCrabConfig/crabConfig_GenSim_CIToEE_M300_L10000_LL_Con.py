@@ -17,7 +17,7 @@ config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = 500
 NJOBS = 100
 config.Data.totalUnits = config.Data.unitsPerJob * NJOBS
-config.Data.outLFNDirBase = '/store/user/szaleski/' 
+config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 config.Data.publication = True
 config.Data.outputDatasetTag = 'EE_GENSIM_LLConM300'
 
