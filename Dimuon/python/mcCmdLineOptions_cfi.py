@@ -53,11 +53,11 @@ def registerDefaultMCOptions(options):
                       VarParsing.VarParsing.multiplicity.singleton,
                       VarParsing.VarParsing.varType.int,
                       "LRISM")
-    options.register ('helicityRL',
-                      0,
-                      VarParsing.VarParsing.multiplicity.singleton,
-                      VarParsing.VarParsing.varType.int,
-                      "RLISM")
+#UNCOMMENT    options.register ('helicityRL',
+#ME                      0,
+#FOR                      VarParsing.VarParsing.multiplicity.singleton,
+#RL                      VarParsing.VarParsing.varType.int,
+#IMPLEMENTATION                     "RLISM")
     options.register ('helicityRR',
                       0,
                       VarParsing.VarParsing.multiplicity.singleton,
