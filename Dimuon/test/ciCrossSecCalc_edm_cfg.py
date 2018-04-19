@@ -102,6 +102,7 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 			'ContactInteractions:Lambda = '+str(options.Lambda),
 			'ContactInteractions:etaLL = '+str(options.helicityLL),
 			'ContactInteractions:etaLR = '+str(options.helicityLR),
+			'ContactInteractions:etaRL = '+str(options.helicityRL),
 			'ContactInteractions:etaRR = '+str(options.helicityRR),
 
                 ),
