@@ -133,6 +133,8 @@ Jobs can also be followed using the task monitoring dashboard.
 
 Once jobs are completed, the RECO process can be started.
 
+
+RECO:
 To start change to the RECO CRAB directory, test/recoCrabConfig.
 To run Locally, make sure that the input file path in the file matches the location of the GENSIM output ROOT file. Then simply do:
 ```
@@ -152,7 +154,16 @@ config.Data.outputDatasetTag = '<output Tag that uniquely identifies the RECO (D
 
 Once these changes are made, CRAB submission is the same as GENSIM, simply use the RECO crabconfig file instead of the GENSIM in the command.
 
+
+AOD:
+
+
 For AOD, change to the test/aodCrabConfig directory and make the changes to the same fields specified in the RECO step in the crab config file, but update to use RECO as input dataset and change the request name and output tag to reflect the AOD.
+
+
+
+
+miniAOD:
 
 For miniAOD, change to the test/miniAODCrabConfig directory and make the changes to the same fields specified in the RECO step in the crab config file, but update to use the AOD as input dataset and change the request name and output tag to reflect miniAOD.
 
