@@ -77,6 +77,62 @@ The .root file will also have all TCanvas objects saved inside it.
 The TCanvas objects also get written out to .png file...if a different format is desired, 
 this can easily be modified inside makeHistogram.cc in the SaveAs() function by changing  .png to .pdf, or some other desired extension.
 
+# CRAB submission steps for Workflow
+
+When running local simulations do the following:
+
+GENSIM:
+
+in test/genSimCrabConfig folder:
+
+One can run locally doing the mc16GenSim_cfg.py, using the same command line input as with ciCrossSecCalc_edm_cfg.py. E.g.
+
+```
+cmsRun mc16GenSim_cfg.py maxEvents=10000 ciGen=1 helicityLL=-1 minMass=300 Lambda=10000 >& outputFile.log &
+
+```
+To submit via CRAB, the crabConfig file needs to be modied. It is highly recomended that the CRAB configuration file name has it's own unique name that clearly identifies the sample that you want to submit. It is also strongly recommended that all naming information used within the configuration file is unique to the sample, especially the request name. 
+
+Make the following changes:
+config.General.requestName = '<some unique name that identifies the sample>'
+config.JopType.psetName = 'mc16GenSim_cfg.py'
+config.JobType.pyCfgParams =[<list of command line input that will be used for the sample just as one would for ciCrossSecCalc_edm_cfg.py>]
+
+config.outputPrimaryDataSet = '<PrimaryDataset name for DAS that will identify the lepton flavor and Lambda value (N.B. all daughter samples e.g. RECO, AOD, miniAOD will inherit from this name)>'
+config.Data.outputDatasetTag = '<secondary DAS name that will be used to uniquely identify a sample within the primary dataset folder>'
+
+For first time setup only you will need to create the crab_projects folder:
+```
+mkdir crab_projects
+```
+
+This is the directory that CRAB will store local CRAB output into.
+
+To submit to CRAB do the following (once only per cd):
+```
+cmsenv
+voms-proxy-init -voms cms --valid 168:00
+source cvmfs/cms.cern.ch/crab3/crab.sh
+```
+Then for each CRAB job that you would like to submit do the following:
+```
+crab submit -c <crabConfigFile>
+```
+You can check the status of the jobs using:
+```
+crab status --dir crab_projects/<CRAB task request name>
+```
+
+If any jobs need to be resubmitted, do the following (N.B. only jobs in FAILED state can be resubmitted):
+
+```
+crab resubmit --dir crab_projects/<CRAB task request name>  --jobids=<comma separated list of jobs e.g. 1,6,10-70>
+```
+
+Jobs can also be followed using the task monitoring dashboard.
+
+Once jobs are completed, the RECO process can be started.
+
 
 
 # Outdated CMSSW_7_4_4 Instructions (Valid for 2015 running)
