@@ -133,6 +133,28 @@ Jobs can also be followed using the task monitoring dashboard.
 
 Once jobs are completed, the RECO process can be started.
 
+To start change to the RECO CRAB directory, test/recoCrabConfig.
+To run Locally, make sure that the input file path in the file matches the location of the GENSIM output ROOT file. Then simply do:
+```
+cmsRun mc16RECO_cfg.py
+```
+
+To submit to CRAB, the process is similar to submitting the GENSIM step. The primary difference comes from modifying the CRAB config file. To do this, open the CRAB config file in a text editor.
+The following will need changes:
+config.General.requestName = '<CRAB task name that identifies the unique sample>'
+config.Data.inputDatset =' <DAS datset name for output GENSIM sample>'
+To find the ouput dataset name you will need to query DAS using the following:
+
+"dataset = /<GENSIM outputPrimaryDataset variable from GENSIM CRABCONFIG>/<username>-<outputDatasetTag variable from GENSIM CRABCONFIG>-*/USER" using the prod/phys03 Database (DBS). Simply copy and paste the appropriate sample name from the DAS page and paste it into the inputDataset variable in the RECO CRAB config file.
+
+Lastly:
+config.Data.outputDatasetTag = '<output Tag that uniquely identifies the RECO (DIGIRAW) sample>'
+
+Once these changes are made, CRAB submission is the same as GENSIM, simply use the RECO crabconfig file instead of the GENSIM in the command.
+
+For AOD, change to the test/aodCrabConfig directory and make the changes to the same fields specified in the RECO step in the crab config file, but update to use RECO as input dataset and change the request name and output tag to reflect the AOD.
+
+For miniAOD, change to the test/miniAODCrabConfig directory and make the changes to the same fields specified in the RECO step in the crab config file, but update to use the AOD as input dataset and change the request name and output tag to reflect miniAOD.
 
 
 # Outdated CMSSW_7_4_4 Instructions (Valid for 2015 running)
