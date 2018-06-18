@@ -55,20 +55,22 @@ for i,ev in enumerate(events):
     if args.debug:
         print("Event {0:8d} had {1:3d} muons".format(i,len(muons)))
         pass
+    print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     for mu in muons:
         if mu.globalTrack().isNonnull():
             if args.debug:
                 print("Found muon with {} tracker layers with measurement".format(mu.globalTrack().hitPattern().trackerLayersWithMeasurement()))
                 pass
-            histTkLayWMeas.Fill(mu.globalTrack().hitPattern().trackerLayersWithMeasurement())
-            histVdPxHits.Fill(mu.globalTrack().hitPattern().numberOfValidPixelHits())
-            histVdMuHits.Fill(mu.globalTrack().hitPattern().numberOfValidMuonHits())
-            histPtRes.Fill(mu.tunePMuonBestTrack().ptError()/mu.tunePMuonBestTrack().pt())
-            histDxy.Fill(mu.tunePMuonBestTrack().dxy())
-            histMatchMuStation.Fill(mu.numberOfMatchedStations())
-            histPt.Fill(mu.tunePMuonBestTrack().pt())
-            histEta.Fill(mu.tunePMuonBestTrack().eta())
-            histPhi.Fill(mu.tunePMuonBestTrack().phi())
+#            histTkLayWMeas.Fill(mu.globalTrack().hitPattern().trackerLayersWithMeasurement())
+#            histVdPxHits.Fill(mu.globalTrack().hitPattern().numberOfValidPixelHits())
+#            histVdMuHits.Fill(mu.globalTrack().hitPattern().numberOfValidMuonHits())
+#            histPtRes.Fill(mu.tunePMuonBestTrack().ptError()/mu.tunePMuonBestTrack().pt())
+#            histDxy.Fill(mu.tunePMuonBestTrack().dxy())
+#            histMatchMuStation.Fill(mu.numberOfMatchedStations())
+#            histPt.Fill(mu.tunePMuonBestTrack().pt())
+#            histEta.Fill(mu.tunePMuonBestTrack().eta())
+#            histPhi.Fill(mu.tunePMuonBestTrack().phi())
+            print "The muon pt:charge is: %f:%f" %(mu.tunePMuonBestTrack().pt(),mu.charge())
         else:
             if args.debug:
                 print("Muon had no valid global track reference")
@@ -88,14 +90,14 @@ for i,run in enumerate(runs):
     print gen.internalXSec().value()
     pass
 
-of.cd()
-histTkLayWMeas.Write()
-histVdPxHits.Write()
-histVdMuHits.Write()
-histPtRes.Write()
-histDxy.Write()
-histMatchMuStation.Write()
-histPt.Write()
-histEta.Write()
-histPhi.Write()
-of.Close()
+#of.cd()
+#histTkLayWMeas.Write()
+#histVdPxHits.Write()
+#histVdMuHits.Write()
+#histPtRes.Write()
+#histDxy.Write()
+#histMatchMuStation.Write()
+#histPt.Write()
+#histEta.Write()
+#histPhi.Write()
+#of.Close()
