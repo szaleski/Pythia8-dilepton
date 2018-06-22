@@ -7,13 +7,14 @@ from DataFormats.FWLite import Events, Handle, Runs
 parser = argparse.ArgumentParser()
 #parser.add_argument("infile", help="Make plots for cosmics",type=str)
 #parser.add_argument("--local", help="local file",action="store_true")
+parser.add_argument("-i", help="Input miniAOD File", type=str)
 parser.add_argument("-d", "--debug", help="debugging information",action="store_true")
 
 args = parser.parse_args()
 
 
-
-with open("fileTest.out", "r") as ins:
+filename = args.i
+with open(filename, "r") as ins:
     array = []
     for line in ins:
         array.append(line.rstrip('\n'))
