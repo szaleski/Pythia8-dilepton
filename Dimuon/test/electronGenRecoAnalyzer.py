@@ -53,7 +53,7 @@ def printGenInfo(numLoopTot, numElectrons, numAntiElectrons):
 
 parser = argparse.ArgumentParser()
 #parser.add_argument("infile", help="Make plots for cosmics",type=str)
-#parser.add_argument("--local", help="local file",action="store_true")
+parser.add_argument("-p", help="privately stored file",action="store_true")
 parser.add_argument("-d", "--debug", help="debugging information",action="store_true")
 parser.add_argument("-i", help="Input miniAOD File", type=str)
 
@@ -65,7 +65,9 @@ with open(filename, "r") as ins:
     array = []
     for line in ins:
         array.append(line.rstrip('\n'))
-eossrc = "root://cmsxrootd.fnal.gov//"
+eossrc = ""
+if(args.p):
+    eossrc = "root://cmsxrootd.fnal.gov//"
 
 rt.gROOT.SetBatch(True)
 # load FWLite C++ libraries
